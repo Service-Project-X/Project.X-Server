@@ -4,18 +4,18 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class User {
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
+
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
   @IsString()
-  nickName: string;
-
-  @Column()
-  @IsString()
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   @IsEmail()
   email: string;
 
