@@ -1,17 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { UserModule } from './user/user.module';
+import { TeamModule } from './team/team.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: 'List_Server',
-        transport: Transport.TCP,
-      },
-    ]),
-  ],
+  imports: [TypeOrmModule.forRoot(), UserModule, TeamModule],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -36,3 +36,6 @@ lerna-debug.log*
 
 # eslint
 .eslintrc.js
+
+# MySQL
+ormconfig.json
