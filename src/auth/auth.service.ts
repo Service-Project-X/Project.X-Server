@@ -4,6 +4,7 @@ import { User } from 'src/user/entity/user.entity';
 import { UserRepository } from 'src/user/entity/user.repository';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -22,10 +23,30 @@ export class AuthService {
     return null;
   }
 
-  async login(user: any) {
+  async login(user: any): Promise<string> {
     const payload = { email: user.email, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    return this.jwtService.sign(payload);
+  }
+
+  async googleLogin(req: Request): Promise<string> {
+    if (!req.user) {
+      return 'No user from google';
+    }
+
+    const foundUser = await this.userRepository.findOne({
+      email: req.user['email'],
+    });
+
+    if (typeof foundUser === 'undefined') {
+      const user: User = new User({
+        name: req.user['lastName'] + req.user['firstName'],
+        email: req.user['email'],
+        userTeams: [],
+      });
+
+      await this.userRepository.save(user);
+    }
+
+    return req.user['accessToken'];
   }
 }
