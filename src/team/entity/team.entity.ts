@@ -1,6 +1,6 @@
 import { IsString } from 'class-validator';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { UserTeam } from './user-team.entity';
+import { UserTeam } from '../../user-team/entity/user-team.entity';
 
 @Entity()
 export class Team {

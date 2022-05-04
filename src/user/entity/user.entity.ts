@@ -1,5 +1,5 @@
 import { IsEmail, IsString } from 'class-validator';
-import { UserTeam } from 'src/team/entity/user-team.entity';
+import { UserTeam } from 'src/user-team/entity/user-team.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
