@@ -12,11 +12,6 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  findAll(): Promise<User[]> {
-    console.log('유저 전체 불러오기');
-    return this.userRepository.find();
-  }
-
   async create(userData: CreateUserDto): Promise<string> {
     const { email, name, password } = userData;
 
@@ -31,5 +26,23 @@ export class UserService {
     const createdUser = await this.userRepository.save(user);
 
     return createdUser.email;
+  }
+
+  async findOne(id?: number, email?: string): Promise<User> {
+    return typeof id === 'number'
+      ? await this.userRepository.findOne(id)
+      : await this.userRepository.findOne({ email });
+  }
+
+  async save(partial: Partial<User>): Promise<User> {
+    const createUser = new User({
+      id: partial['id'],
+      name: partial['name'],
+      email: partial['email'],
+      password: partial['password'],
+      userTeams: partial['userTeams'],
+    });
+
+    return await this.userRepository.save(createUser);
   }
 }
