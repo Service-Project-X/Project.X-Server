@@ -1,21 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/entity/user.entity';
-import { UserRepository } from 'src/user/entity/user.repository';
+import { User } from '../user/entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: UserRepository,
+    private readonly userService: UserService,
     private jwtService: JwtService,
   ) {}
 
   async validateUser(email: string, password: string) {
-    const foundUser = await this.userRepository.findOne({ email: email });
+    const foundUser = await this.userService.findOne(null, email);
     if (await bcrypt.compare(password, foundUser.password)) {
       const { password, ...result } = foundUser;
       return result;
@@ -33,9 +31,7 @@ export class AuthService {
       return 'No user from google';
     }
 
-    const foundUser = await this.userRepository.findOne({
-      email: req.user['email'],
-    });
+    const foundUser = await this.userService.findOne(null, req.user['email']);
 
     if (typeof foundUser === 'undefined') {
       const user: User = new User({
@@ -44,7 +40,7 @@ export class AuthService {
         userTeams: [],
       });
 
-      await this.userRepository.save(user);
+      await this.userService.save(user);
     }
 
     return req.user['accessToken'];

@@ -6,6 +6,7 @@ import { TeamModule } from './team/team.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { UserTeamModule } from './user-team/user-team.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     UserModule,
     TeamModule,
     AuthModule,
+    UserTeamModule,
   ],
   controllers: [AppController],
   providers: [AppService],
