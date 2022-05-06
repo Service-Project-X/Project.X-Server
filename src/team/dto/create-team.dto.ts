@@ -1,11 +1,3 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { TeamBaseDto } from './team-base.dto';
 
-export class CreateTeamDto {
-  constructor(partial: Partial<CreateTeamDto>) {
-    Object.assign(this, partial);
-  }
-
-  @IsString()
-  @IsNotEmpty()
-  teamName: string;
-}
+export class CreateTeamDto extends TeamBaseDto {}

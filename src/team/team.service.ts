@@ -6,6 +6,7 @@ import { TeamRepository } from './entity/team.repository';
 import { UserService } from '../user/user.service';
 import { UserTeamService } from '../user-team/user-team.service';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateTeamDto } from './dto/update-team.dto';
 
 @Injectable()
 export class TeamService {
@@ -15,13 +16,28 @@ export class TeamService {
     private readonly userService: UserService,
     private readonly userTeamService: UserTeamService,
   ) {}
+  async findOne(teamId: number): Promise<Team> {
+    return await this.teamRepository.findOne(teamId);
+  }
+
+  async save(partial: Partial<Team>): Promise<Team> {
+    return await this.teamRepository.save(new Team(partial));
+  }
+
+  async updateTeam(teamId: number, updateTeam: UpdateTeamDto) {
+    return await this.teamRepository.update(teamId, updateTeam);
+  }
+
+  async deleteTeam(teamId: number) {
+    return await this.teamRepository.delete(teamId);
+  }
 
   async createTeam(userId: number, createTeam: CreateTeamDto) {
     const team: Team = new Team({
       teamName: createTeam.teamName,
       userTeams: [],
     });
-    const createdTeam: Team = await this.teamRepository.save(team);
+    const createdTeam: Team = await this.save(team);
 
     const userTeam = new UserTeam({
       user: await this.userService.findOne(userId, null),
