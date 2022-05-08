@@ -12,26 +12,14 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async create(userData: CreateUserDto): Promise<string> {
-    const { email, name, password } = userData;
-
-    const user = new User({
-      id: null,
-      email: email,
-      name: name,
-      password: await bcrypt.hash(password, 10),
-      userTeams: [],
-    });
-
-    const createdUser = await this.userRepository.save(user);
-
-    return createdUser.email;
-  }
-
   async findOne(id?: number, email?: string): Promise<User> {
-    return typeof id === 'number'
-      ? await this.userRepository.findOne(id)
-      : await this.userRepository.findOne({ email });
+    try {
+      return typeof id === 'number'
+        ? await this.userRepository.findOne(id)
+        : await this.userRepository.findOne({ email });
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   async save(partial: Partial<User>): Promise<User> {
@@ -43,6 +31,26 @@ export class UserService {
       userTeams: partial['userTeams'],
     });
 
-    return await this.userRepository.save(createUser);
+    try {
+      return await this.userRepository.save(createUser);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async createUser(userData: CreateUserDto): Promise<string> {
+    const { email, name, password } = userData;
+
+    const user = new User({
+      id: null,
+      email: email,
+      name: name,
+      password: await bcrypt.hash(password, 10),
+      userTeams: [],
+    });
+
+    const createdUser = await this.save(user);
+
+    return createdUser.email;
   }
 }

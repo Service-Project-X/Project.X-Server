@@ -9,7 +9,7 @@ export class UserController {
 
   @Post()
   async create(@Body() userData: CreateUserDto): Promise<ResponseDTO<string>> {
-    const userEmail: string = await this.userService.create(userData);
+    const userEmail: string = await this.userService.createUser(userData);
     return new ResponseDTO<string>({ message: 'success', data: userEmail });
   }
 }

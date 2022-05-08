@@ -4,48 +4,53 @@ import { UserService } from '../../user/user.service';
 import { User } from '../../user/entity/user.entity';
 import { CreateTeamDto } from '../dto/create-team.dto';
 import { Team } from '../entity/team.entity';
-import { TeamRepository } from '../entity/team.repository';
 import { TeamService } from '../team.service';
 import { UserTeamService } from '../../user-team/user-team.service';
 import { UserTeam } from '../../user-team/entity/user-team.entity';
+import { UpdateTeamDto } from '../dto/update-team.dto';
+import { Repository, UpdateResult } from 'typeorm';
+
+type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
 let service: TeamService;
-let teamRepository: TeamRepository;
-let userService: UserService;
-let userTeamService: UserTeamService;
+let teamRepository: MockRepository<Team>;
+let userRepository: MockRepository<User>;
+let userTeamRepository: MockRepository<UserTeam>;
 
 async function injectDependence() {
   const module: TestingModule = await Test.createTestingModule({
     providers: [
       TeamService,
-      TeamRepository,
       {
         provide: getRepositoryToken(Team),
         useValue: {
           save: jest.fn(),
+          update: jest.fn(),
         },
       },
       {
-        provide: UserService,
+        provide: getRepositoryToken(User),
         useValue: {
           findOne: jest.fn(),
-          save: jest.fn(),
         },
       },
       {
-        provide: UserTeamService,
+        provide: getRepositoryToken(UserTeam),
         useValue: {
-          findOne: jest.fn(),
           save: jest.fn(),
         },
       },
+      UserService,
+      UserTeamService,
     ],
   }).compile();
 
   service = module.get<TeamService>(TeamService);
-  teamRepository = module.get<TeamRepository>(TeamRepository);
-  userService = module.get<UserService>(UserService);
-  userTeamService = module.get<UserTeamService>(UserTeamService);
+  teamRepository = module.get<MockRepository<Team>>(getRepositoryToken(Team));
+  userRepository = module.get<MockRepository<User>>(getRepositoryToken(User));
+  userTeamRepository = module.get<MockRepository<UserTeam>>(
+    getRepositoryToken(UserTeam),
+  );
 }
 
 describe('TeamService', () => {
@@ -64,49 +69,35 @@ describe('TeamService 팀 생성', () => {
   });
 
   it('팀 생성 실패(Save Team Error)', async () => {
-    jest
-      .spyOn(teamRepository, 'save')
-      .mockImplementation(() => Promise.reject(new Error('error')));
-
-    const result = await service.createTeam(
-      1,
-      new CreateTeamDto({ teamName: 'test' }),
+    teamRepository.save.mockImplementation(() =>
+      Promise.reject(new Error('error')),
     );
 
-    expect(result).toBeUndefined();
+    try {
+      await service.createTeam(1, new CreateTeamDto({ teamName: 'test' }));
+    } catch (error) {
+      expect(error.message).toBe('error');
+    }
   });
 
   it('팀 생성 실패(FindOne User Error)', async () => {
-    jest
-      .spyOn(teamRepository, 'save')
-      .mockImplementation(() => Promise.reject(new Team({})));
+    teamRepository.save.mockImplementation(() => Promise.resolve(new Team({})));
 
-    jest.spyOn(userService, 'findOne').mockImplementation(() =>
-      Promise.resolve(
-        new User({
-          id: 1,
-          name: 'test',
-          email: 'asdf@asdf.com',
-          password: 'asdf',
-          userTeams: [],
-        }),
-      ),
+    userRepository.findOne.mockImplementation(() =>
+      Promise.reject(new Error('error')),
     );
 
-    const result = await service.createTeam(
-      1,
-      new CreateTeamDto({ teamName: 'test' }),
-    );
-
-    expect(result).toBeUndefined();
+    try {
+      await service.createTeam(1, new CreateTeamDto({ teamName: 'test' }));
+    } catch (error) {
+      expect(error.message).toBe('error');
+    }
   });
 
   it('팀 생성 실패(Save UserTeam Error)', async () => {
-    jest
-      .spyOn(teamRepository, 'save')
-      .mockImplementation(() => Promise.reject(new Team({})));
+    teamRepository.save.mockImplementation(() => Promise.resolve(new Team({})));
 
-    jest.spyOn(userService, 'findOne').mockImplementation(() =>
+    userRepository.findOne.mockImplementation(() =>
       Promise.resolve(
         new User({
           id: 1,
@@ -118,28 +109,21 @@ describe('TeamService 팀 생성', () => {
       ),
     );
 
-    jest
-      .spyOn(userTeamService, 'save')
-      .mockImplementation(() =>
-        Promise.resolve(
-          new UserTeam({ id: 1, user: new User({}), team: new Team({}) }),
-        ),
-      );
-
-    const result = await service.createTeam(
-      1,
-      new CreateTeamDto({ teamName: 'test' }),
+    userTeamRepository.save.mockImplementation(() =>
+      Promise.reject(new Error('error')),
     );
 
-    expect(result).toBeUndefined();
+    try {
+      await service.createTeam(1, new CreateTeamDto({ teamName: 'test' }));
+    } catch (error) {
+      expect(error.message).toBe('error');
+    }
   });
 
   it('팀 생성 성공', async () => {
-    jest
-      .spyOn(teamRepository, 'save')
-      .mockImplementation(() => Promise.reject(new Team({})));
+    teamRepository.save.mockImplementation(() => Promise.resolve(new Team({})));
 
-    jest.spyOn(userService, 'findOne').mockImplementation(() =>
+    userRepository.findOne.mockImplementation(() =>
       Promise.resolve(
         new User({
           id: 1,
@@ -151,19 +135,47 @@ describe('TeamService 팀 생성', () => {
       ),
     );
 
-    jest
-      .spyOn(userTeamService, 'save')
-      .mockImplementation(() =>
-        Promise.resolve(
-          new UserTeam({ id: 1, user: new User({}), team: new Team({}) }),
-        ),
-      );
+    userTeamRepository.save.mockImplementation(() =>
+      Promise.resolve(
+        new UserTeam({ id: 1, user: new User({}), team: new Team({}) }),
+      ),
+    );
 
     const result = await service.createTeam(
       1,
       new CreateTeamDto({ teamName: 'test' }),
     );
 
-    expect(result).toBeUndefined();
+    expect(result).toStrictEqual(new Team({}));
+  });
+});
+
+describe('TeamService 팀명 수정', () => {
+  beforeEach(async () => {
+    await injectDependence();
+  });
+
+  it('팀명 수정 실패(Update Team Error)', async () => {
+    teamRepository.update.mockImplementation(() => new Error('Team not found'));
+
+    try {
+      await service.updateTeamName(
+        1,
+        new UpdateTeamDto({ teamName: 'Update Team' }),
+      );
+    } catch (error) {
+      expect(error.message).toBe('Team not found');
+    }
+  });
+
+  it('팀명 수정 성공', async () => {
+    teamRepository.update.mockResolvedValue(new UpdateResult());
+
+    const result = await service.updateTeamName(
+      1,
+      new UpdateTeamDto({ teamName: 'Update Team' }),
+    );
+
+    expect(result).toBe('Team name updated successfully');
   });
 });

@@ -7,6 +7,7 @@ import { UserService } from '../user/user.service';
 import { UserTeamService } from '../user-team/user-team.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateTeamDto } from './dto/update-team.dto';
+import { DeleteResult, UpdateResult } from 'typeorm';
 
 @Injectable()
 export class TeamService {
@@ -17,34 +18,66 @@ export class TeamService {
     private readonly userTeamService: UserTeamService,
   ) {}
   async findOne(teamId: number): Promise<Team> {
-    return await this.teamRepository.findOne(teamId);
+    try {
+      return await this.teamRepository.findOne(teamId);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   async save(partial: Partial<Team>): Promise<Team> {
-    return await this.teamRepository.save(new Team(partial));
+    try {
+      return await this.teamRepository.save(new Team(partial));
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
-  async updateTeam(teamId: number, updateTeam: UpdateTeamDto) {
-    return await this.teamRepository.update(teamId, updateTeam);
+  async update(
+    teamId: number,
+    updateTeam: UpdateTeamDto,
+  ): Promise<UpdateResult> {
+    try {
+      return await this.teamRepository.update(teamId, updateTeam);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
-  async deleteTeam(teamId: number) {
-    return await this.teamRepository.delete(teamId);
+  async delete(teamId: number): Promise<DeleteResult> {
+    try {
+      return await this.teamRepository.delete(teamId);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   async createTeam(userId: number, createTeam: CreateTeamDto) {
-    const team: Team = new Team({
-      teamName: createTeam.teamName,
-      userTeams: [],
-    });
-    const createdTeam: Team = await this.save(team);
+    try {
+      const team: Team = new Team({
+        teamName: createTeam.teamName,
+        userTeams: [],
+      });
+      const createdTeam: Team = await this.save(team);
 
-    const userTeam = new UserTeam({
-      user: await this.userService.findOne(userId, null),
-      team: createdTeam,
-    });
-    await this.userTeamService.save(userTeam);
+      const userTeam = new UserTeam({
+        user: await this.userService.findOne(userId, null),
+        team: createdTeam,
+      });
+      await this.userTeamService.save(userTeam);
 
-    return createdTeam;
+      return createdTeam;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async updateTeamName(teamId: number, updateTeam: UpdateTeamDto) {
+    try {
+      await this.update(teamId, updateTeam);
+      return 'Team name updated successfully';
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 }
