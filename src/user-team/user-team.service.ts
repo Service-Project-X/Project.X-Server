@@ -17,6 +17,10 @@ export class UserTeamService {
       team: partial['team'],
     });
 
-    return await this.userTeamRepository.save(createUserTeam);
+    try {
+      return await this.userTeamRepository.save(createUserTeam);
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 }
