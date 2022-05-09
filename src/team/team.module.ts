@@ -1,16 +1,19 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserTeamModule } from '../user-team/user-team.module';
-import { UserModule } from '../user/user.module';
-import { Team } from './entity/team.entity';
+import { UserTeamModule } from 'src/user-team/user-team.module';
+import { UserModule } from 'src/user/user.module';
 import { TeamRepository } from './entity/team.repository';
 import { TeamController } from './team.controller';
 import { TeamService } from './team.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Team]), UserModule, UserTeamModule],
+  imports: [
+    TypeOrmModule.forFeature([TeamRepository]),
+    UserModule,
+    UserTeamModule,
+  ],
   controllers: [TeamController],
-  providers: [TeamService, TeamRepository],
-  exports: [TypeOrmModule.forFeature([Team]), TeamRepository],
+  providers: [TeamService],
+  exports: [TeamService],
 })
 export class TeamModule {}
