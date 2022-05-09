@@ -3,17 +3,17 @@ import { User } from '../user/entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { UserService } from '../user/user.service';
+import { UserRepository } from '../user/entity/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly userRepository: UserRepository,
     private jwtService: JwtService,
   ) {}
 
   async validateUser(email: string, password: string) {
-    const foundUser = await this.userService.findOne(null, email);
+    const foundUser = await this.userRepository.findOne({ email });
     if (await bcrypt.compare(password, foundUser.password)) {
       const { password, ...result } = foundUser;
       return result;
@@ -31,7 +31,9 @@ export class AuthService {
       return 'No user from google';
     }
 
-    const foundUser = await this.userService.findOne(null, req.user['email']);
+    const foundUser = await this.userRepository.findOne({
+      email: req.user['email'],
+    });
 
     if (typeof foundUser === 'undefined') {
       const user: User = new User({
@@ -40,7 +42,7 @@ export class AuthService {
         userTeams: [],
       });
 
-      await this.userService.save(user);
+      await this.userRepository.save(user);
     }
 
     return req.user['accessToken'];

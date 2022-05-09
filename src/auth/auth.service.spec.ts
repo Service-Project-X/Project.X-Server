@@ -1,8 +1,8 @@
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
+import { UserRepository } from '../user/entity/user.repository';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -15,16 +15,7 @@ describe('AuthService', () => {
           signOptions: { expiresIn: '3h' },
         }),
       ],
-      providers: [
-        AuthService,
-        {
-          provide: UserService,
-          useValue: {
-            findOne: jest.fn(),
-            save: jest.fn(),
-          },
-        },
-      ],
+      providers: [AuthService, UserRepository],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
