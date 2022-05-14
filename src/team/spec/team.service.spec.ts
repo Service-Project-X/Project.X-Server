@@ -5,7 +5,7 @@ import { Team } from '../entity/team.entity';
 import { TeamService } from '../team.service';
 import { UserTeam } from '../../user-team/entity/user-team.entity';
 import { UpdateTeamDto } from '../dto/update-team.dto';
-import { UpdateResult } from 'typeorm';
+import { DeleteResult, UpdateResult } from 'typeorm';
 import { UserService } from '../../user/user.service';
 import { UserTeamService } from '../../user-team/user-team.service';
 import { TeamRepository } from '../entity/team.repository';
@@ -169,6 +169,33 @@ describe('TeamService', () => {
       );
 
       expect(result).toBe('Team name updated successfully');
+    });
+  });
+
+  describe('TeamService 팀 탈퇴', () => {
+    it('팀 탈퇴 실패(Delete UserTeam Error)', async () => {
+      jest
+        .spyOn(userTeamRepository, 'deleteWithUserIdAndTeamId')
+        .mockRejectedValue(new Error('error'));
+
+      try {
+        await service.leaveTeam(1, 1);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀 탈퇴 성공', async () => {
+      const deleteResult = new DeleteResult();
+      deleteResult.raw = [];
+      deleteResult.affected = 1;
+
+      jest
+        .spyOn(userTeamRepository, 'deleteWithUserIdAndTeamId')
+        .mockResolvedValue(deleteResult);
+
+      const result = await service.leaveTeam(1, 1);
+      expect(result).toBe('Team left successfully');
     });
   });
 });

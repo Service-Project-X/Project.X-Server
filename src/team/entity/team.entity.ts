@@ -15,6 +15,8 @@ export class Team {
   @IsString()
   teamName: string;
 
-  @OneToMany(() => UserTeam, (userTeam) => userTeam.team)
+  @OneToMany(() => UserTeam, (userTeam) => userTeam.team, {
+    cascade: true,
+  })
   userTeams: UserTeam[];
 }

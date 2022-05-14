@@ -19,6 +19,8 @@ export class User {
   @Column({ nullable: true })
   password: string;
 
-  @OneToMany(() => UserTeam, (userTeam) => userTeam.user)
+  @OneToMany(() => UserTeam, (userTeam) => userTeam.user, {
+    cascade: true,
+  })
   userTeams: UserTeam[];
 }

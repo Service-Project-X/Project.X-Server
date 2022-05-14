@@ -11,11 +11,17 @@ export class UserTeam {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.userTeams)
+  @ManyToOne(() => User, (user) => user.userTeams, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   user: User;
 
-  @ManyToOne(() => Team, (team) => team.userTeams)
+  @ManyToOne(() => Team, (team) => team.userTeams, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   team: Team;
 }
