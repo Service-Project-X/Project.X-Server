@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserId } from '../global/decorators/userId.decorator';
 import { CreateTeamDto } from './dto/create-team.dto';
@@ -17,6 +24,16 @@ export class TeamController {
   ): Promise<Team> {
     try {
       return await this.teamService.createTeam(userId, createTeam);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  @Delete('/:teamId')
+  @UseGuards(JwtAuthGuard)
+  async deleteTeam(@Param('teamId') teamId: number): Promise<string> {
+    try {
+      return await this.teamService.deleteTeam(teamId);
     } catch (error) {
       throw new Error(error.message);
     }

@@ -57,4 +57,25 @@ describe('TeamController', () => {
       expect(result).toBe(team);
     });
   });
+
+  describe('TeamController 팀 삭제', () => {
+    it('팀 삭제 실패(Delete Team Error)', async () => {
+      jest.spyOn(service, 'deleteTeam').mockRejectedValue(new Error('error'));
+
+      try {
+        await controller.deleteTeam(19);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀 삭제 성공', async () => {
+      jest
+        .spyOn(service, 'deleteTeam')
+        .mockResolvedValue('Team deleted successfully');
+
+      const result = await controller.deleteTeam(19);
+      expect(result).toBe('Team deleted successfully');
+    });
+  });
 });
