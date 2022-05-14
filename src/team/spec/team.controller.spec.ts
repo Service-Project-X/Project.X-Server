@@ -4,6 +4,7 @@ import { UserTeamService } from '../../user-team/user-team.service';
 import { UserRepository } from '../../user/entity/user.repository';
 import { UserService } from '../../user/user.service';
 import { CreateTeamDto } from '../dto/create-team.dto';
+import { UpdateTeamDto } from '../dto/update-team.dto';
 import { Team } from '../entity/team.entity';
 import { TeamRepository } from '../entity/team.repository';
 import { TeamController } from '../team.controller';
@@ -55,6 +56,33 @@ describe('TeamController', () => {
         new CreateTeamDto({ teamName: '124' }),
       );
       expect(result).toBe(team);
+    });
+  });
+
+  describe('TeamController 팀명 수정', () => {
+    it('팀명 수정 실패(Save Team Error)', async () => {
+      jest
+        .spyOn(service, 'updateTeamName')
+        .mockRejectedValue(new Error('error'));
+
+      const updateTeam = new UpdateTeamDto({ teamName: 'update' });
+
+      try {
+        await controller.updateTeamName(19, updateTeam);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀명 수정 성공', async () => {
+      jest
+        .spyOn(service, 'updateTeamName')
+        .mockResolvedValue('Team name updated successfully');
+
+      const updateTeam = new UpdateTeamDto({ teamName: 'update' });
+
+      const result = await controller.updateTeamName(19, updateTeam);
+      expect(result).toBe('Team name updated successfully');
     });
   });
 
