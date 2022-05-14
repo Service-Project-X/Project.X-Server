@@ -1,4 +1,24 @@
-import { Controller } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserId } from '../global/decorators/userId.decorator';
+import { CreateTeamDto } from './dto/create-team.dto';
+import { Team } from './entity/team.entity';
+import { TeamService } from './team.service';
 
 @Controller('team')
-export class TeamController {}
+export class TeamController {
+  constructor(private readonly teamService: TeamService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async createTeam(
+    @UserId() userId: number,
+    @Body() createTeam: CreateTeamDto,
+  ): Promise<Team> {
+    try {
+      return await this.teamService.createTeam(userId, createTeam);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+}
