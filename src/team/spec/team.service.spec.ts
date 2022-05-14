@@ -198,4 +198,29 @@ describe('TeamService', () => {
       expect(result).toBe('Team left successfully');
     });
   });
+
+  describe('TeamService 팀 삭제', () => {
+    it('팀 삭제 실패(Delete Team Error)', async () => {
+      jest
+        .spyOn(teamRepository, 'delete')
+        .mockRejectedValue(new Error('error'));
+
+      try {
+        await service.deleteTeam(1);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀 삭제 성공', async () => {
+      const deleteResult = new DeleteResult();
+      deleteResult.raw = [];
+      deleteResult.affected = 1;
+
+      jest.spyOn(teamRepository, 'delete').mockResolvedValue(deleteResult);
+
+      const result = await service.deleteTeam(1);
+      expect(result).toBe('Team deleted successfully');
+    });
+  });
 });

@@ -93,4 +93,13 @@ export class TeamService {
       throw new Error(error.message);
     }
   }
+
+  async deleteTeam(teamId: number): Promise<string> {
+    try {
+      await this.teamRepository.delete(teamId);
+      return 'Team deleted successfully';
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 }
