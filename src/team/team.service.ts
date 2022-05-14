@@ -70,14 +70,27 @@ export class TeamService {
   }
 
   async joinTeam(userId: number, teamId: number): Promise<UserTeam> {
-    const foundUser: User = await this.userService.findOne(userId);
-    const foundTeam: Team = await this.teamRepository.findOne(teamId);
+    try {
+      const foundUser: User = await this.userService.findOne(userId);
+      const foundTeam: Team = await this.teamRepository.findOne(teamId);
 
-    return await this.userTeamService.save(
-      new UserTeam({
-        user: foundUser,
-        team: foundTeam,
-      }),
-    );
+      return await this.userTeamService.save(
+        new UserTeam({
+          user: foundUser,
+          team: foundTeam,
+        }),
+      );
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async leaveTeam(userId: number, teamId: number): Promise<string> {
+    try {
+      await this.userTeamService.deleteWithUserIdAndTeamId(userId, teamId);
+      return 'Team left successfully';
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 }
