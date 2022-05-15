@@ -10,8 +10,8 @@ export class UserTeamRepository extends Repository<UserTeam> {
     return await this.createQueryBuilder()
       .delete()
       .from(UserTeam)
-      .where('user_id = :userId', { userId: userId })
-      .andWhere('team_id = :teamId', { teamId: teamId })
+      .where('userId = :userId', { userId: userId })
+      .andWhere('teamId = :teamId', { teamId: teamId })
       .execute();
   }
 }
