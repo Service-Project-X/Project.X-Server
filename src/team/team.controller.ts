@@ -2,9 +2,15 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
   Param,
+  ParseBoolPipe,
+  ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -26,6 +32,25 @@ export class TeamController {
   ): Promise<Team> {
     try {
       return await this.teamService.createTeam(userId, createTeam);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  async joinOrLeaveTeam(
+    @UserId() userId: number,
+    @Query('whether', ParseBoolPipe) whether: boolean,
+    @Query('teamId', ParseIntPipe) teamId: number,
+  ): Promise<void> {
+    try {
+      if (whether) {
+        await this.teamService.joinTeam(userId, teamId);
+      } else {
+        await this.teamService.leaveTeam(userId, teamId);
+      }
     } catch (error) {
       throw new Error(error.message);
     }
