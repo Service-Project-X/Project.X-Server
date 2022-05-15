@@ -4,7 +4,7 @@ import { CreateTeamDto } from './dto/create-team.dto';
 import { Team } from './entity/team.entity';
 import { TeamRepository } from './entity/team.repository';
 import { UpdateTeamDto } from './dto/update-team.dto';
-import { UpdateResult } from 'typeorm';
+import { DeleteResult, UpdateResult } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { UserTeamService } from '../user-team/user-team.service';
 import { User } from '../user/entity/user.entity';
@@ -35,6 +35,13 @@ export class TeamService {
       throw new Error('Fail to Change Team Name');
     } else {
       return 'Team name updated successfully';
+    }
+  }
+
+  async delete(teamId: number): Promise<void> {
+    const deleteResult: DeleteResult = await this.teamRepository.delete(teamId);
+    if (deleteResult.affected == 0) {
+      throw new Error('Fail to delete Team');
     }
   }
 
@@ -96,7 +103,7 @@ export class TeamService {
 
   async deleteTeam(teamId: number): Promise<string> {
     try {
-      await this.teamRepository.delete(teamId);
+      await this.delete(teamId);
       return 'Team deleted successfully';
     } catch (error) {
       throw new Error(error.message);
