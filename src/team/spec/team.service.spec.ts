@@ -168,7 +168,7 @@ describe('TeamService', () => {
         new UpdateTeamDto({ teamName: 'Update Team' }),
       );
 
-      expect(result).toBe('Team name updated successfully');
+      expect(result).toBeUndefined();
     });
   });
 
@@ -195,7 +195,7 @@ describe('TeamService', () => {
         .mockResolvedValue(deleteResult);
 
       const result = await service.leaveTeam(1, 1);
-      expect(result).toBe('Team left successfully');
+      expect(result).toBeUndefined();
     });
   });
 
@@ -220,7 +220,7 @@ describe('TeamService', () => {
       jest.spyOn(teamRepository, 'delete').mockResolvedValue(deleteResult);
 
       const result = await service.deleteTeam(1);
-      expect(result).toBe('Team deleted successfully');
+      expect(result).toBeUndefined();
     });
   });
 });
