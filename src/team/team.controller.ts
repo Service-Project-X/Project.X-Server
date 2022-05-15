@@ -57,23 +57,25 @@ export class TeamController {
   }
 
   @Put('/:teamId')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   async updateTeamName(
     @Param('teamId') teamId: number,
     @Body() updateTeam: UpdateTeamDto,
-  ): Promise<string> {
+  ): Promise<void> {
     try {
-      return await this.teamService.updateTeamName(teamId, updateTeam);
+      await this.teamService.updateTeamName(teamId, updateTeam);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
   @Delete('/:teamId')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
-  async deleteTeam(@Param('teamId') teamId: number): Promise<string> {
+  async deleteTeam(@Param('teamId') teamId: number): Promise<void> {
     try {
-      return await this.teamService.deleteTeam(teamId);
+      await this.teamService.deleteTeam(teamId);
     } catch (error) {
       throw new Error(error.message);
     }

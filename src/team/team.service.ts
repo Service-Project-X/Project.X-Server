@@ -26,15 +26,13 @@ export class TeamService {
     }
   }
 
-  async update(teamId: number, updateTeam: UpdateTeamDto): Promise<string> {
+  async update(teamId: number, updateTeam: UpdateTeamDto): Promise<void> {
     const updateResult: UpdateResult = await this.teamRepository.update(
       teamId,
       new Team(updateTeam),
     );
     if (updateResult.affected == 0) {
       throw new Error('Fail to Change Team Name');
-    } else {
-      return 'Team name updated successfully';
     }
   }
 
@@ -68,20 +66,26 @@ export class TeamService {
   async updateTeamName(
     teamId: number,
     updateTeam: UpdateTeamDto,
-  ): Promise<string> {
+  ): Promise<void> {
     try {
-      return await this.update(teamId, updateTeam);
+      await this.update(teamId, updateTeam);
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  async joinTeam(userId: number, teamId: number): Promise<UserTeam> {
+  async joinTeam(userId: number, teamId: number): Promise<void> {
     try {
+      // 테스트 코드 추가하기?
+      await this.isExistTeam(teamId);
+      if (await this.isAlreadyJoined(userId, teamId)) {
+        throw new Error('Already Joined');
+      }
+
       const foundUser: User = await this.userService.findOne(userId);
       const foundTeam: Team = await this.teamRepository.findOne(teamId);
 
-      return await this.userTeamService.save(
+      await this.userTeamService.save(
         new UserTeam({
           user: foundUser,
           team: foundTeam,
@@ -92,19 +96,48 @@ export class TeamService {
     }
   }
 
-  async leaveTeam(userId: number, teamId: number): Promise<string> {
+  private async isExistTeam(teamId: number): Promise<void> {
     try {
-      await this.userTeamService.deleteWithUserIdAndTeamId(userId, teamId);
-      return 'Team left successfully';
+      const team = await this.teamRepository.findOne(teamId);
+      if (typeof team == 'undefined') {
+        throw new Error('Fail to find Team');
+      }
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
-  async deleteTeam(teamId: number): Promise<string> {
+  private async isAlreadyJoined(
+    userId: number,
+    teamId: number,
+  ): Promise<boolean> {
+    try {
+      const result = await this.userTeamService.findOneWithUserIdAndTeamId(
+        userId,
+        teamId,
+      );
+      return typeof result !== 'undefined' ? true : false;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async leaveTeam(userId: number, teamId: number): Promise<void> {
+    try {
+      await this.isExistTeam(teamId);
+      if (!(await this.isAlreadyJoined(userId, teamId))) {
+        throw new Error('Not Joined');
+      }
+
+      await this.userTeamService.deleteWithUserIdAndTeamId(userId, teamId);
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async deleteTeam(teamId: number): Promise<void> {
     try {
       await this.delete(teamId);
-      return 'Team deleted successfully';
     } catch (error) {
       throw new Error(error.message);
     }

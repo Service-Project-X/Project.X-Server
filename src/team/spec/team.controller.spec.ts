@@ -74,13 +74,7 @@ describe('TeamController', () => {
     });
 
     it('팀 참가 성공', async () => {
-      jest.spyOn(service, 'joinTeam').mockResolvedValue(
-        new UserTeam({
-          id: 1,
-          user: new User({ id: 19 }),
-          team: new Team({ id: 1 }),
-        }),
-      );
+      jest.spyOn(service, 'joinTeam').mockResolvedValue(undefined);
 
       const result = await controller.joinOrLeaveTeam(19, true, 1);
       expect(result).toBeUndefined();
@@ -99,9 +93,7 @@ describe('TeamController', () => {
     });
 
     it('팀 탈퇴 성공', async () => {
-      jest
-        .spyOn(service, 'leaveTeam')
-        .mockResolvedValue('Team deleted successfully');
+      jest.spyOn(service, 'leaveTeam').mockResolvedValue(undefined);
 
       const result = await controller.joinOrLeaveTeam(19, false, 1);
       expect(result).toBeUndefined();
@@ -124,14 +116,12 @@ describe('TeamController', () => {
     });
 
     it('팀명 수정 성공', async () => {
-      jest
-        .spyOn(service, 'updateTeamName')
-        .mockResolvedValue('Team name updated successfully');
+      jest.spyOn(service, 'updateTeamName').mockResolvedValue(undefined);
 
       const updateTeam = new UpdateTeamDto({ teamName: 'update' });
 
       const result = await controller.updateTeamName(19, updateTeam);
-      expect(result).toBe('Team name updated successfully');
+      expect(result).toBeUndefined();
     });
   });
 
@@ -147,12 +137,10 @@ describe('TeamController', () => {
     });
 
     it('팀 삭제 성공', async () => {
-      jest
-        .spyOn(service, 'deleteTeam')
-        .mockResolvedValue('Team deleted successfully');
+      jest.spyOn(service, 'deleteTeam').mockResolvedValue(undefined);
 
       const result = await controller.deleteTeam(19);
-      expect(result).toBe('Team deleted successfully');
+      expect(result).toBeUndefined();
     });
   });
 });

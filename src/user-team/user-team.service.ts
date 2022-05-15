@@ -15,6 +15,20 @@ export class UserTeamService {
     }
   }
 
+  async findOneWithUserIdAndTeamId(
+    userId: number,
+    teamId: number,
+  ): Promise<UserTeam> {
+    try {
+      return await this.userTeamRepository.findOneWithUserIdAndTeamId(
+        userId,
+        teamId,
+      );
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async deleteWithUserIdAndTeamId(
     userId: number,
     teamId: number,
