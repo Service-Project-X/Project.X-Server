@@ -1,13 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserTeam } from '../../user-team/entity/user-team.entity';
+import { User } from '../../user/entity/user.entity';
 import { UserTeamRepository } from '../../user-team/entity/user-team.repository';
 import { UserTeamService } from '../../user-team/user-team.service';
 import { UserRepository } from '../../user/entity/user.repository';
 import { UserService } from '../../user/user.service';
 import { CreateTeamDto } from '../dto/create-team.dto';
+import { UpdateTeamDto } from '../dto/update-team.dto';
 import { Team } from '../entity/team.entity';
 import { TeamRepository } from '../entity/team.repository';
 import { TeamController } from '../team.controller';
 import { TeamService } from '../team.service';
+import { DeleteResult } from 'typeorm';
 
 describe('TeamController', () => {
   let controller: TeamController;
@@ -55,6 +59,79 @@ describe('TeamController', () => {
         new CreateTeamDto({ teamName: '124' }),
       );
       expect(result).toBe(team);
+    });
+  });
+
+  describe('TeamController 팀 참가', () => {
+    it('팀 참가 실패(Save UserTeam Error)', async () => {
+      jest.spyOn(service, 'joinTeam').mockRejectedValue(new Error('error'));
+
+      try {
+        await controller.joinOrLeaveTeam(19, true, 1);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀 참가 성공', async () => {
+      jest.spyOn(service, 'joinTeam').mockResolvedValue(
+        new UserTeam({
+          id: 1,
+          user: new User({ id: 19 }),
+          team: new Team({ id: 1 }),
+        }),
+      );
+
+      const result = await controller.joinOrLeaveTeam(19, true, 1);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('TeamController 팀 탈퇴', () => {
+    it('팀 탈퇴 실패(Delete UserTeam Error)', async () => {
+      jest.spyOn(service, 'leaveTeam').mockRejectedValue(new Error('error'));
+
+      try {
+        await controller.joinOrLeaveTeam(19, false, 1);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀 탈퇴 성공', async () => {
+      jest
+        .spyOn(service, 'leaveTeam')
+        .mockResolvedValue('Team deleted successfully');
+
+      const result = await controller.joinOrLeaveTeam(19, false, 1);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('TeamController 팀명 수정', () => {
+    it('팀명 수정 실패(Save Team Error)', async () => {
+      jest
+        .spyOn(service, 'updateTeamName')
+        .mockRejectedValue(new Error('error'));
+
+      const updateTeam = new UpdateTeamDto({ teamName: 'update' });
+
+      try {
+        await controller.updateTeamName(19, updateTeam);
+      } catch (error) {
+        expect(error.message).toBe('error');
+      }
+    });
+
+    it('팀명 수정 성공', async () => {
+      jest
+        .spyOn(service, 'updateTeamName')
+        .mockResolvedValue('Team name updated successfully');
+
+      const updateTeam = new UpdateTeamDto({ teamName: 'update' });
+
+      const result = await controller.updateTeamName(19, updateTeam);
+      expect(result).toBe('Team name updated successfully');
     });
   });
 
