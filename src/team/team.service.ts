@@ -76,6 +76,12 @@ export class TeamService {
 
   async joinTeam(userId: number, teamId: number): Promise<void> {
     try {
+      // 테스트 코드 추가하기?
+      await this.isExistTeam(teamId);
+      if (await this.isAlreadyJoined(userId, teamId)) {
+        throw new Error('Already Joined');
+      }
+
       const foundUser: User = await this.userService.findOne(userId);
       const foundTeam: Team = await this.teamRepository.findOne(teamId);
 
@@ -90,8 +96,39 @@ export class TeamService {
     }
   }
 
+  private async isExistTeam(teamId: number): Promise<void> {
+    try {
+      const team = await this.teamRepository.findOne(teamId);
+      if (typeof team == 'undefined') {
+        throw new Error('Fail to find Team');
+      }
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  private async isAlreadyJoined(
+    userId: number,
+    teamId: number,
+  ): Promise<boolean> {
+    try {
+      const result = await this.userTeamService.findOneWithUserIdAndTeamId(
+        userId,
+        teamId,
+      );
+      return typeof result !== 'undefined' ? true : false;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async leaveTeam(userId: number, teamId: number): Promise<void> {
     try {
+      await this.isExistTeam(teamId);
+      if (!(await this.isAlreadyJoined(userId, teamId))) {
+        throw new Error('Not Joined');
+      }
+
       await this.userTeamService.deleteWithUserIdAndTeamId(userId, teamId);
     } catch (error) {
       throw new Error(error.message);

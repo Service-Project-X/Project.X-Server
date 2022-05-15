@@ -1,50 +1,23 @@
-import 'dotenv/config';
-import { join } from 'path';
-import { ConnectionOptions } from 'typeorm';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
-interface DBConnectionOptions {
-  [env: string]: ConnectionOptions;
-}
+const NODE_ENV: string = process.env.NODE_ENV || 'development';
 
-const connectionOptions: DBConnectionOptions = {
-  development: {
-    type: 'mysql',
-    host: process.env.DEVELOPMENT_DATABASE_HOST,
-    port: +process.env.DEVELOPMENT_DATABASE_PORT,
-    username: process.env.DEVELOPMENT_DATABASE_USER,
-    password: process.env.DEVELOPMENT_DATABASE_PASSWORD,
-    database: process.env.DEVELOPMENT_DATABASE_NAME,
-    synchronize: false,
-    logging: true,
-    entities: ['./dist/**/*.entity.js'],
-    migrations: [
-      process.env.NODE_ENV === 'production'
-        ? join(__dirname, '../dist/migrations/*{.ts,.js}')
-        : join(__dirname, '/migrations/*{.ts,.js}'),
-    ],
-    cli: {
-      migrationsDir: 'migration',
-    },
-  },
-  production: {
-    type: 'mysql',
-    host: process.env.PRODUCTION_DATABASE_HOST,
-    port: +process.env.PRODUCTION_DATABASE_PORT,
-    username: process.env.PRODUCTION_DATABASE_USER,
-    password: process.env.PRODUCTION_DATABASE_PASSWORD,
-    database: process.env.PRODUCTION_DATABASE_NAME,
-    synchronize: true,
-    logging: true,
-    entities: ['./dist/**/*.entity.js'],
-    migrations: [
-      process.env.NODE_ENV === 'production'
-        ? join(__dirname, '../dist/migrations/*{.ts,.js}')
-        : join(__dirname, '/migrations/*{.ts,.js}'),
-    ],
-    cli: {
-      migrationsDir: 'migration',
-    },
-  },
+const DATABASE_HOST = process.env.DATABASE_HOST || 'localhost';
+const DATABASE_PORT = Number(process.env.DATABASE_PORT) || 3306;
+const DATABASE_USER = process.env.DATABASE_USER || 'project.x';
+const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD || 'project.x';
+const DATABASE_NAME = process.env.DATABASE_NAME || 'ProjectX';
+
+const TYPEORM: TypeOrmModuleOptions = {
+  type: 'mysql',
+  host: DATABASE_HOST,
+  port: DATABASE_PORT,
+  username: DATABASE_USER,
+  password: DATABASE_PASSWORD,
+  database: DATABASE_NAME,
+  synchronize: false,
+  logging: true,
+  entities: ['./dist/**/*.entity.js'],
 };
 
-export { connectionOptions };
+export { NODE_ENV, TYPEORM };
