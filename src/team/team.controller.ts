@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -52,7 +53,15 @@ export class TeamController {
         await this.teamService.leaveTeam(userId, teamId);
       }
     } catch (error) {
-      throw new Error(error.message);
+      if (
+        error.message == 'Already Joined' ||
+        error.message == 'Fail to find Team' ||
+        error.message == 'Not Joined'
+      ) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error(error.message);
+      }
     }
   }
 
